@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Summarizer</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #182026;
+      background: linear-gradient(135deg, #f4f8fb 0%, #e8f0f5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .app {
+      width: min(980px, 100%);
+      background: #ffffff;
+      border: 1px solid #dce7ee;
+      border-radius: 8px;
+      box-shadow: 0 18px 50px rgba(24, 32, 38, 0.12);
+      padding: 32px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      line-height: 1.1;
+      color: #0d3b52;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 16px;
+      color: #5b6b75;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 15px;
+      font-weight: 700;
+      color: #22323b;
+    }
+
+    textarea {
+      min-height: 300px;
+      resize: vertical;
+      border: 1px solid #c7d6df;
+      border-radius: 8px;
+      padding: 16px;
+      font: inherit;
+      line-height: 1.6;
+      color: #26343c;
+      background: #fbfdfe;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: #2d8fb8;
+      box-shadow: 0 0 0 3px rgba(45, 143, 184, 0.16);
+    }
+
+    .summary-box {
+      min-height: 300px;
+      border: 1px solid #c7d6df;
+      border-radius: 8px;
+      padding: 16px;
+      line-height: 1.6;
+      color: #41515a;
+      background: #f7fafc;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      background: #0d6f98;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #095f83;
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 24px;
+      }
+
+      .header h1 {
+        font-size: 30px;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      textarea,
+      .summary-box {
+        min-height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="header">
+      <h1>Text Summarizer</h1>
+      <p>Paste a dialogue and get a short, clear summary.</p>
+    </section>
+
+    <section class="workspace">
+      <div class="panel">
+        <label for="dialogue">Dialogue</label>
+        <textarea id="dialogue" placeholder="Paste your dialogue here..."></textarea>
+      </div>
+
+      <div class="panel">
+        <label for="summary">Summarized Text</label>
+        <div class="summary-box" id="summary">
+          Your summarized text will appear here.
+        </div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button id = "btn" type="button" disabled>Summarize</button>
+    </div>
+  </main>
+</body>
+
+<script>
+    const dialogueInput = document.getElementById("dialogue");
+    const summaryBox = document.getElementById("summary");
+    const btn = document.getElementById("btn");
+
+    dialogueInput.addEventListener("input", function () {
+        const text = dialogueInput.value.trim();
+        btn.disabled = text.length === 0;
+    });
+
+    document.getElementById("btn").addEventListener("click", async function(){
+
+        const text = dialogueInput.value.trim();
+
+        if (text.length === 0) return;
+        btn.disabled = true;
+        summaryBox.innerText = "Summarizing...";
+
+        const response = await fetch("/summarize", {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                dialogue: text
+            })
+        });
+
+            const data = await response.json();
+            document.getElementById("summary").innerText = data.summary;
+
+             btn.disabled = dialogueInput.value.trim().length === 0;
+    });
+
+</script>
+</html>
